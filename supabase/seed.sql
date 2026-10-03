@@ -1,0 +1,1 @@
+-- Solo datos sintéticos (DB-018). Vacío hasta que existan tablas.
