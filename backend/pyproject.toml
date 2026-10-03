@@ -7,6 +7,8 @@ requires-python = ">=3.14"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+# Tests contra Supabase local: corren por defecto; sin la base de datos arriba, fallan.
+markers = ["integration: requiere Supabase local en ejecución"]
 # QA-009: orden aleatorio por pytest-randomly; QA-007: umbral mínimo de cobertura.
 addopts = "--cov=app --cov-report=term-missing --cov-fail-under=80"
 
@@ -22,7 +24,7 @@ files = ["app", "tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py314"
-src = ["app", "tests"]
+src = ["."]
 
 [tool.ruff.lint]
 select = [

@@ -8,16 +8,17 @@ peervibe es una plataforma de referencia y calificación de productos con reseñ
 
 ## Fase actual
 
-Fase 0 de arranque, en la rama `chore/fase-0-arranque`. F0-1 (preguntas), F0-2 (perfil) y F0-3 (estructura y documentos base) están completas. F0-4 (scaffolding, esqueletos de módulos y migración inicial) va en 4 de 11 commits:
+Fase 0 de arranque, en la rama `chore/fase-0-arranque`. F0-1 (preguntas), F0-2 (perfil) y F0-3 (estructura y documentos base) están completas. F0-4 (scaffolding, esqueletos de módulos y migración inicial) va en 5 de 11 commits:
 
 1. Proyecto Supabase local (`supabase/`), con TOTP, confirmación de correo, contraseña de al menos 12 caracteres y GRANTs explícitos.
 2. Runtimes fijados: Python 3.14 y Node 24.
 3. Manifiestos y lockfile con hashes del backend, con la configuración de pytest, mypy, ruff, vulture e import-linter.
 4. Frontend (`frontend/`): Vite, React, Tailwind con tokens neutros, ESLint con boundaries y su test permanente, Vitest, Playwright y knip.
+5. Núcleo del backend (`backend/app/core/` y `shared/`): configuración tipada (ARQ-016) con verificación de producción (SEC-019), sesión que opera como el usuario y modo anónimo (DB-012, DB-014, B.7), envelope de errores y `trace_id` (API-005), `/health` (OPS-004) y `create_app` sin documentación interactiva ni OpenAPI público. Sus tests, incluidos los de integración contra Supabase local, y los paquetes vacíos de `app/modules/` con un `service.py` vacío por módulo.
 
-Aún no hay código de aplicación, esquema de base de datos ni CI. Excepciones vigentes: `docs/ADR/002-braces-herramientas-de-compilacion.md` (aviso de `braces`) y la excepción temporal de knip (QA-015) en `frontend/knip.jsonc`, que se vacía al usarse cada dependencia.
+Aún no hay módulos con lógica, esquema de base de datos ni CI. Excepciones vigentes: `docs/ADR/002-braces-herramientas-de-compilacion.md` (aviso de `braces`) y la excepción temporal de knip (QA-015) en `frontend/knip.jsonc`, que se vacía al usarse cada dependencia.
 
-Próxima tarea: commit 5a de F0-4 (`core/` con la configuración tipada, la sesión como el usuario y el modo anónimo, el `trace_id` y el envelope de errores, `shared/` y `/health`, con sus tests contra Supabase local). Después, 5b (esqueletos de los módulos base `auth`, `users`, `settings`, `admin` y `logs`) y los commits 6 a 10 acordados; el caso de lectura del modo anónimo (DB-014) va en el commit 9, tras las migraciones.
+Próxima tarea: commit 5b de F0-4, los esqueletos de los módulos base `auth`, `users`, `settings`, `admin` y `logs` con las capas de ARQ-008. Después, los commits 6 a 10 acordados; el caso de lectura del modo anónimo (DB-014) va en el commit 9, tras las migraciones.
 
 Pendientes conocidos, fuera de 5a y 5b:
 
@@ -41,7 +42,7 @@ Ver `docs/PROJECT_PROFILE.yaml`: datos personales, IA solo para resumen de rese�
 
 ## Módulos
 
-Ninguno aún. Los módulos base (ARQ-018) y los de dominio se crean en F0-4 y después.
+Ninguno con lógica aún. Existen los paquetes vacíos de los módulos base (ARQ-018: `auth`, `users`, `settings`, `admin` y `logs`) y un `service.py` vacío por módulo, porque el contrato de ARQ-008 los exige como módulos fuente; así los contratos de import-linter resuelven. Las demás capas llegan en 5b y los módulos de dominio, después.
 
 ## Proveedores
 
@@ -78,3 +79,6 @@ Los documentos maestros (`ENGINEERING_STANDARDS.md` y `docs/playbook-privacidad.
 | Anexo C.2, B.4, ARQ-006, ARQ-009 | `ENGINEERING_STANDARDS.md` | Indicar que `eslint-plugin-boundaries` con TypeScript exige configurar `"import/resolver"` con extensiones TypeScript (`.ts`, `.tsx`), sin instalar dependencias nuevas. Además, la v7 deprecó las reglas clásicas (`element-types`, `entry-point`, `external`), que sin opciones son no-ops: la regla vigente es `boundaries/dependencies`. | El resolver por defecto solo prueba extensiones `.js`: sin ese ajuste, los destinos de los imports quedan como elemento desconocido y la regla no detecta ninguna violación, aunque ESLint termine en verde. B.4 y las reglas LINT de ARQ-006 y ARQ-009 deberían nombrar la regla vigente y exigir un test que pruebe que las violaciones se detectan. |
 | DB-014, Anexo B.7 | `ENGINEERING_STANDARDS.md` | Precisar cuándo se prueba el modo anónimo del helper de sesión. | B.7 pide probar que el modo anónimo solo ve lo que permiten las políticas de lectura pública, pero F0-4 termina con el test de DB-014 en verde y esas políticas y tablas llegan después. Aquí la parte sin tablas (rol `anon`, sin claims) se prueba en el commit 5a y la lectura pública en el commit 9, tras las migraciones. |
 | API-005, API-013, B.5 | `ENGINEERING_STANDARDS.md` | Indicar en qué paso nacen el manejador global de errores y el `trace_id`. | API-005 y API-013 los exigen en todo endpoint, pero ni F0-4 ni B.5 los ubican en un paso. Aquí nacen en el commit 5a (envelope y `trace_id` en la respuesta); la propagación a los logs (OPS-005) queda pendiente y su test es verificación manual en la DoD. |
+| B.1, ARQ-006, B.4 | `ENGINEERING_STANDARDS.md` | Exigir que el caso válido de cada comprobación demuestre que esta evaluó algo. | B.1 pide un caso válido y otro inválido, pero un comando que no ejecuta nada pasa el válido en vacío y hace fallar los inválidos por la razón equivocada. Aquí el caso válido de import-linter exige que el informe indique los contratos evaluados y cumplidos. |
+| F0-4a, F0-4b, ARQ-006 | `ENGINEERING_STANDARDS.md` | Indicar cuándo se declaran los contratos de import-linter. | Los contratos nombran los módulos base antes de que existan, y `lint-imports` falla hasta que F0-4b los crea. Aquí se crean los paquetes vacíos de los módulos y un service.py vacío por módulo, porque el contrato de ARQ-008 los exige como módulos fuente, en el commit 5a para mantener el linter en verde. |
+| SEC-019, ARQ-010, OPS-002 | `ENGINEERING_STANDARDS.md` | Indicar cómo obtiene el generador de cliente el OpenAPI cuando la documentación interactiva está desactivada. | create_app fija docs_url, redoc_url y openapi_url en None en todos los entornos (SEC-019 sin condicionar por entorno, OPS-002), pero ARQ-010 toma el OpenAPI como fuente de los tipos. Aquí el generador deberá obtenerlo con `app.openapi()` y no por HTTP. |
