@@ -8,17 +8,18 @@ peervibe es una plataforma de referencia y calificación de productos con reseñ
 
 ## Fase actual
 
-Fase 0 de arranque, en la rama `chore/fase-0-arranque`. F0-1 (preguntas), F0-2 (perfil) y F0-3 (estructura y documentos base) están completas. F0-4 (scaffolding, esqueletos de módulos y migración inicial) va en 5 de 11 commits:
+Fase 0 de arranque, en la rama `chore/fase-0-arranque`. F0-1 (preguntas), F0-2 (perfil) y F0-3 (estructura y documentos base) están completas. F0-4 (scaffolding, esqueletos de módulos y migración inicial) va en 6 de 11 commits:
 
 1. Proyecto Supabase local (`supabase/`), con TOTP, confirmación de correo, contraseña de al menos 12 caracteres y GRANTs explícitos.
 2. Runtimes fijados: Python 3.14 y Node 24.
 3. Manifiestos y lockfile con hashes del backend, con la configuración de pytest, mypy, ruff, vulture e import-linter.
 4. Frontend (`frontend/`): Vite, React, Tailwind con tokens neutros, ESLint con boundaries y su test permanente, Vitest, Playwright y knip.
 5. Núcleo del backend (`backend/app/core/` y `shared/`): configuración tipada (ARQ-016) con verificación de producción (SEC-019), sesión que opera como el usuario y modo anónimo (DB-012, DB-014, B.7), envelope de errores y `trace_id` (API-005), `/health` (OPS-004) y `create_app` sin documentación interactiva ni OpenAPI público. Sus tests, incluidos los de integración contra Supabase local, y los paquetes vacíos de `app/modules/` con un `service.py` vacío por módulo.
+6. Esqueletos de los módulos base (`backend/app/modules/{auth,users,settings,admin,logs}/`): las capas de ARQ-008 sin lógica y un `APIRouter` vacío por módulo, registrado en `create_app` bajo `/api/v1` (API-001). `tests/test_estructura.py` comprueba por AST las capas, el registro de los routers y que ningún `service.py` importa la sesión de base de datos.
 
 Aún no hay módulos con lógica, esquema de base de datos ni CI. Excepciones vigentes: `docs/ADR/002-braces-herramientas-de-compilacion.md` (aviso de `braces`) y la excepción temporal de knip (QA-015) en `frontend/knip.jsonc`, que se vacía al usarse cada dependencia.
 
-Próxima tarea: commit 5b de F0-4, los esqueletos de los módulos base `auth`, `users`, `settings`, `admin` y `logs` con las capas de ARQ-008. Después, los commits 6 a 10 acordados; el caso de lectura del modo anónimo (DB-014) va en el commit 9, tras las migraciones.
+Próxima tarea: commit 6 de F0-4, el árbol del frontend (`core/`, `shared/` y los esqueletos de los módulos base con su `index.ts`, providers, router y cliente generado vacío). Después, los commits 7 a 10 acordados; el caso de lectura del modo anónimo (DB-014) va en el commit 9, tras las migraciones.
 
 Pendientes conocidos, fuera de 5a y 5b:
 
@@ -42,7 +43,7 @@ Ver `docs/PROJECT_PROFILE.yaml`: datos personales, IA solo para resumen de rese�
 
 ## Módulos
 
-Ninguno con lógica aún. Existen los paquetes vacíos de los módulos base (ARQ-018: `auth`, `users`, `settings`, `admin` y `logs`) y un `service.py` vacío por módulo, porque el contrato de ARQ-008 los exige como módulos fuente; así los contratos de import-linter resuelven. Las demás capas llegan en 5b y los módulos de dominio, después.
+Ninguno con lógica aún. Los módulos base (ARQ-018: `auth`, `users`, `settings`, `admin` y `logs`) existen como esqueletos del backend: `router.py` (un `APIRouter` vacío, registrado en `create_app` bajo `/api/v1`), `schemas.py`, `service.py`, `repository.py`, `models.py` y `dependencies.py` (ARQ-008), sin lógica ni endpoints. Los módulos de dominio y la contraparte del frontend se crean después.
 
 ## Proveedores
 

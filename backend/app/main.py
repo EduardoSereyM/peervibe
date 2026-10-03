@@ -13,6 +13,13 @@ from app.core.database import Database, create_user_engine
 from app.core.errors import register_error_handlers
 from app.core.health import router as health_router
 from app.core.tracing import TraceIdMiddleware
+from app.modules.admin.router import router as admin_router
+from app.modules.auth.router import router as auth_router
+from app.modules.logs.router import router as logs_router
+from app.modules.settings.router import router as settings_router
+from app.modules.users.router import router as users_router
+
+API_V1_PREFIX = "/api/v1"
 
 
 def create_app(settings: Settings | None = None, database: Database | None = None) -> FastAPI:
@@ -40,4 +47,9 @@ def create_app(settings: Settings | None = None, database: Database | None = Non
     app.add_middleware(TraceIdMiddleware)
     register_error_handlers(app)
     app.include_router(health_router)
+    app.include_router(auth_router, prefix=API_V1_PREFIX)
+    app.include_router(users_router, prefix=API_V1_PREFIX)
+    app.include_router(settings_router, prefix=API_V1_PREFIX)
+    app.include_router(admin_router, prefix=API_V1_PREFIX)
+    app.include_router(logs_router, prefix=API_V1_PREFIX)
     return app
