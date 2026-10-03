@@ -1,0 +1,15 @@
+{
+  // Excepción temporal de QA-015: aún no hay código de aplicación que use estas dependencias.
+  // Se escribe en F0-4 (commit 6) y en el flujo de cliente generado (F0-5). Cada una sale de la
+  // lista cuando se use; el CI de F0-5 exige la lista vacía.
+  "ignoreDependencies": [
+    "@supabase/supabase-js",
+    "@tanstack/react-query",
+    "react-router",
+    "zustand",
+    "@axe-core/playwright",
+    "@hey-api/openapi-ts",
+    "@testing-library/react",
+    "@testing-library/user-event"
+  ]
+}

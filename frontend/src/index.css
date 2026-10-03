@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+/* Tokens neutros provisionales (ADR 001, UI-010). Reemplazarlos al definirse la marca. */
+@theme {
+  --color-fondo: var(--fondo);
+  --color-superficie: var(--superficie);
+  --color-texto: var(--texto);
+  --color-texto-suave: var(--texto-suave);
+  --color-borde: var(--borde);
+  --color-acento: var(--acento);
+  --color-acento-texto: var(--acento-texto);
+  --radius-base: 0.5rem;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  --fondo: #ffffff;
+  --superficie: #f4f4f5;
+  --texto: #18181b;
+  --texto-suave: #52525b;
+  --borde: #d4d4d8;
+  --acento: #3f3f46;
+  --acento-texto: #ffffff;
+  color-scheme: light;
+}
+
+/* UI-011: sigue la preferencia del sistema salvo elección explícita del usuario. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fondo: #18181b;
+    --superficie: #27272a;
+    --texto: #fafafa;
+    --texto-suave: #a1a1aa;
+    --borde: #3f3f46;
+    --acento: #d4d4d8;
+    --acento-texto: #18181b;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --fondo: #18181b;
+  --superficie: #27272a;
+  --texto: #fafafa;
+  --texto-suave: #a1a1aa;
+  --borde: #3f3f46;
+  --acento: #d4d4d8;
+  --acento-texto: #18181b;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--fondo);
+  color: var(--texto);
+  font-family: var(--font-sans);
+}
