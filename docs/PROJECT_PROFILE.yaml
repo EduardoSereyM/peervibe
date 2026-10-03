@@ -1,0 +1,39 @@
+# Perfil del proyecto — define qué reglas del estándar aplican.
+# Validado contra el código en CI (ARQ-017). Modificarlo es ASK.
+
+proyecto: peervibe
+
+# ¿El sistema trata datos de personas naturales? (casi siempre: true)
+datos_personales: true
+
+# RUT: none | hmac | hmac+cifrado  (DB-021)
+rut: none
+
+# ¿Integra modelos de IA dentro del producto? (Sección 9)
+llm: true
+
+# Usos de la IA, si llm: true (IA-006, IA-009, PRIV-019): moderacion | resumen | recomendaciones | asistencia | otro
+llm_usos: [resumen]
+
+# ¿Recibe webhooks (pagos, integraciones)? (API-012)
+pagos_webhooks: false
+
+# ¿Los usuarios suben archivos? (SEC-015)
+uploads: true
+
+# ¿Existe entorno de staging? Obligatorio desde el primer usuario real (OPS-001)
+entorno_staging: true
+
+# Perfiles opcionales, cada uno con su ADR (ARQ-015): bff | cache | realtime
+perfiles_opcionales: []
+
+# Categorías de exención de espejo habilitadas (ARQ-004):
+# webhook | job | integracion_externa | og | health | admin_sin_ui
+mirror_exclusions: [og, health]
+
+# Módulos base opcionales que el proyecto necesita (ARQ-018): dashboard | notifications
+modulos_opcionales: []
+
+# Versión del estándar presente en este proyecto (PRO-015).
+estandar:
+  version: "6.1.0"
