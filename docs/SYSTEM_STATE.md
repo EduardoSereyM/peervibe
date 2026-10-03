@@ -8,7 +8,9 @@ peervibe es una plataforma de referencia y calificación de productos con reseñ
 
 ## Fase actual
 
-Fase 0 de arranque, en la rama `chore/fase-0-arranque`. Existen el perfil del proyecto y los documentos base. No hay aún código de aplicación, esquema de base de datos ni CI.
+Fase 0 de arranque, en la rama `chore/fase-0-arranque`. F0-1 (preguntas), F0-2 (perfil) y F0-3 (estructura y documentos base) están completas. No hay aún código de aplicación, esquema de base de datos ni CI.
+
+Próxima tarea: F0-4 (scaffolding, esqueletos de módulos y migración inicial). Empieza presentando la lista exacta de dependencias y los commits propuestos, y espera aprobación antes de instalar nada (PRO-005).
 
 ## Perfil
 
