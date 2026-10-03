@@ -1,0 +1,11 @@
+-c requirements.txt
+pytest
+pytest-asyncio
+pytest-cov
+pytest-randomly
+ruff
+mypy
+import-linter
+vulture
+pip-tools
+pip-audit

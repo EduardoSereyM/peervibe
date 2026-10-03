@@ -1,0 +1,82 @@
+[project]
+name = "peervibe-backend"
+version = "0.0.0"
+requires-python = ">=3.14"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+# QA-009: orden aleatorio por pytest-randomly; QA-007: umbral mínimo de cobertura.
+addopts = "--cov=app --cov-report=term-missing --cov-fail-under=80"
+
+[tool.coverage.run]
+branch = false
+source = ["app"]
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["app", "tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E", "F", "W", "I", "N", "UP", "B", "A", "S", "C4", "C90", "PL", "RUF", "T20", "ASYNC",
+  "ERA", "TD", "FIX", "BLE", "TRY", "SIM", "PT", "ANN",
+]
+ignore = ["TD003"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-args = 6
+max-branches = 10
+max-statements = 40
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "PLR2004", "ANN"]
+
+[tool.vulture]
+paths = ["app"]
+min_confidence = 80
+
+[tool.importlinter]
+root_package = "app"
+include_external_packages = true
+
+# ARQ-006: ningún módulo importa desde otro módulo.
+[[tool.importlinter.contracts]]
+name = "Módulos independientes entre sí (ARQ-006)"
+type = "independence"
+modules = [
+  "app.modules.auth",
+  "app.modules.users",
+  "app.modules.settings",
+  "app.modules.admin",
+  "app.modules.logs",
+]
+
+# ARQ-006: módulos -> shared -> core; core no importa de los demás.
+[[tool.importlinter.contracts]]
+name = "Direcciones de import permitidas (ARQ-006)"
+type = "layers"
+layers = ["app.modules", "app.shared", "app.core"]
+
+# ARQ-008: el service no toca la sesión de DB ni SQLAlchemy.
+[[tool.importlinter.contracts]]
+name = "El service no accede a datos (ARQ-008)"
+type = "forbidden"
+source_modules = [
+  "app.modules.auth.service",
+  "app.modules.users.service",
+  "app.modules.settings.service",
+  "app.modules.admin.service",
+  "app.modules.logs.service",
+]
+forbidden_modules = ["sqlalchemy", "asyncpg"]

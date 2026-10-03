@@ -1,0 +1,11 @@
+fastapi
+pydantic
+pydantic-settings
+sqlalchemy[asyncio]
+asyncpg
+PyJWT[crypto]
+httpx
+Pillow
+filetype
+limits
+structlog
