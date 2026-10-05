@@ -16,6 +16,7 @@ from fastapi import APIRouter
 APP_DIR = pathlib.Path(__file__).resolve().parents[1] / "app"
 MODULES_DIR = APP_DIR / "modules"
 MODULES = ("auth", "users", "settings", "admin", "logs")
+BASE_MODULES = frozenset(MODULES)
 LAYERS = (
     "__init__",
     "router",
@@ -106,20 +107,33 @@ def _registered_modules(tree: ast.Module, aliases: dict[str, str]) -> set[str]:
     return registered
 
 
-def registration_problems(source: str) -> tuple[int, list[str]]:
-    """(routers evaluados, problemas): cada router de módulo importado debe incluirse en la
-    aplicación (`app.include_router`, no en otro objeto) con `prefix=API_V1_PREFIX`, y esa
-    constante debe valer `/api/v1`."""
+def _existing_modules() -> frozenset[str]:
+    """Módulos presentes en `app/modules` (directorios que son paquetes)."""
+    return frozenset(path.parent.name for path in MODULES_DIR.glob("*/__init__.py"))
+
+
+def registration_problems(
+    source: str, existing_modules: frozenset[str]
+) -> tuple[int, set[str], list[str]]:
+    """(routers evaluados, módulos registrados, problemas): cada router de módulo importado debe
+    incluirse en la aplicación (`app.include_router`, no en otro objeto) con
+    `prefix=API_V1_PREFIX`; todo módulo de `existing_modules` debe tener su router importado, y
+    esa constante debe valer `/api/v1`."""
     tree = ast.parse(source)
     aliases = _router_aliases(tree)
     registered = _registered_modules(tree, aliases)
+    imported = set(aliases.values())
     problems = [
         f"{module}: router sin registrar con prefix={PREFIX_CONSTANT}"
-        for module in sorted(set(aliases.values()) - registered)
+        for module in sorted(imported - registered)
+    ]
+    problems += [
+        f"{module}: módulo en app/modules sin su router importado en main.py"
+        for module in sorted(existing_modules - imported)
     ]
     if _prefix_value(tree) != EXPECTED_PREFIX:
         problems.append(f"{PREFIX_CONSTANT} debe valer {EXPECTED_PREFIX!r}")
-    return len(aliases), problems
+    return len(aliases), registered, problems
 
 
 def _main_source(
@@ -156,16 +170,34 @@ def test_module_exposes_an_api_router(module: str) -> None:
 
 
 def test_main_registers_every_module_router_under_the_api_prefix() -> None:
-    evaluated, problems = registration_problems((APP_DIR / "main.py").read_text())
+    """Cota mínima: los módulos de dominio que se agreguen no rompen la prueba, pero tienen que
+    estar registrados."""
+    existing = _existing_modules()
 
-    assert evaluated == len(MODULES)
+    evaluated, registered, problems = registration_problems(
+        (APP_DIR / "main.py").read_text(), existing
+    )
+
+    assert set(MODULES) <= registered
+    assert existing <= registered
+    assert evaluated >= len(MODULES)
     assert problems == []
 
 
 def test_valid_synthetic_main_has_no_problems() -> None:
-    evaluated, problems = registration_problems(_main_source())
+    evaluated, registered, problems = registration_problems(_main_source(), BASE_MODULES)
 
-    assert (evaluated, problems) == (len(MODULES), [])
+    assert (evaluated, registered, problems) == (len(MODULES), set(MODULES), [])
+
+
+def test_module_present_but_not_imported_in_main_is_detected() -> None:
+    evaluated, registered, problems = registration_problems(
+        _main_source(), BASE_MODULES | {"facturas"}
+    )
+
+    assert evaluated == len(MODULES)
+    assert registered == set(MODULES)
+    assert problems == ["facturas: módulo en app/modules sin su router importado en main.py"]
 
 
 @pytest.mark.parametrize(
@@ -192,7 +224,7 @@ def test_valid_synthetic_main_has_no_problems() -> None:
     ],
 )
 def test_invalid_synthetic_main_is_detected(source: str, expected: list[str]) -> None:
-    evaluated, problems = registration_problems(source)
+    evaluated, _, problems = registration_problems(source, BASE_MODULES)
 
     assert evaluated == len(MODULES)
     assert problems == expected
